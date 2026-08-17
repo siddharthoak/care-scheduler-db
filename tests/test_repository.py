@@ -100,3 +100,19 @@ def test_cancel_requires_non_placeholder_reason_variations():
     with pytest.raises(ValueError):
         repo.cancel("a1", "  - -  ")
 
+
+def test_cancel_accepts_emojis_and_special_characters():
+    repo = AppointmentRepository()
+    repo.create(_appointment())
+    valid_reasons = [
+        "Patient had a family emergency 🎂",
+        "Doctor recommended rescheduling!",
+        "Felt much better today :)",
+        "予約キャンセルのため",
+    ]
+    for reason in valid_reasons:
+        repo.cancel("a1", reason)
+        appointment = repo.get("a1")
+        assert appointment.cancellation_reason == reason
+
+
