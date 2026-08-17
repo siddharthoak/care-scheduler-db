@@ -87,3 +87,16 @@ def test_list_for_patient():
     repo.create(_appointment())
     repo.create(_appointment(appointment_id="a2", provider_id="prov2"))
     assert len(repo.list_for_patient("p1")) == 2
+
+
+def test_cancel_requires_non_placeholder_reason_variations():
+    repo = AppointmentRepository()
+    repo.create(_appointment())
+    # Test variation of placeholders with extra spaces and mixed casing
+    with pytest.raises(ValueError):
+        repo.cancel("a1", "  NONE  ")
+    with pytest.raises(ValueError):
+        repo.cancel("a1", "tbd")
+    with pytest.raises(ValueError):
+        repo.cancel("a1", "  - -  ")
+
