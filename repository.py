@@ -30,9 +30,10 @@ class AppointmentRepository:
         self._appointments[appointment.appointment_id] = appointment
         return appointment
 
-    def cancel(self, appointment_id: str) -> Appointment:
+    def cancel(self, appointment_id: str, cancellation_reason: str) -> Appointment:
         appointment = self._appointments[appointment_id]
         appointment.status = "cancelled"
+        appointment.cancellation_reason = cancellation_reason
         return appointment
 
     def get(self, appointment_id: str) -> Appointment | None:

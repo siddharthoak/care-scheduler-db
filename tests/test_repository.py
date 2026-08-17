@@ -33,9 +33,18 @@ def test_double_booking_is_rejected():
 def test_cancelled_slot_can_be_rebooked():
     repo = AppointmentRepository()
     repo.create(_appointment())
-    repo.cancel("a1")
+    repo.cancel("a1", "change of plans")
     repo.create(_appointment(appointment_id="a2", patient_id="p2"))
     assert repo.get("a2").status == "scheduled"
+
+
+def test_cancellation_reason_is_stored():
+    repo = AppointmentRepository()
+    repo.create(_appointment())
+    repo.cancel("a1", "health improvement")
+    appointment = repo.get("a1")
+    assert appointment.status == "cancelled"
+    assert appointment.cancellation_reason == "health improvement"
 
 
 def test_list_for_patient():
