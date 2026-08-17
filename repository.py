@@ -30,10 +30,36 @@ class AppointmentRepository:
         self._appointments[appointment.appointment_id] = appointment
         return appointment
 
-    def cancel(self, appointment_id: str) -> Appointment:
+    def cancel(self, appointment_id: str, cancellation_reason: str) -> Appointment:
+        if not cancellation_reason or not cancellation_reason.strip():
+            raise ValueError("Cancellation reason is required and cannot be empty")
+        if self._is_placeholder(cancellation_reason):
+            raise ValueError("Cancellation reason cannot be a placeholder")
         appointment = self._appointments[appointment_id]
         appointment.status = "cancelled"
+        appointment.cancellation_reason = cancellation_reason
         return appointment
+
+    def _is_placeholder(self, reason: str) -> bool:
+        cleaned = reason.strip().lower()
+        if not cleaned:
+            return True
+        if not any(c.isalnum() for c in cleaned):
+            return True
+        placeholders = {
+            "placeholder",
+            "none",
+            "n/a",
+            "na",
+            "no reason",
+            "blank",
+            "test",
+            "tbd",
+            "temp",
+            "null",
+            "undefined",
+        }
+        return cleaned in placeholders
 
     def get(self, appointment_id: str) -> Appointment | None:
         return self._appointments.get(appointment_id)
