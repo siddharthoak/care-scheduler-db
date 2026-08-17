@@ -47,6 +47,41 @@ def test_cancellation_reason_is_stored():
     assert appointment.cancellation_reason == "health improvement"
 
 
+def test_cancel_requires_non_empty_reason():
+    repo = AppointmentRepository()
+    repo.create(_appointment())
+    with pytest.raises(ValueError) as excinfo:
+        repo.cancel("a1", "")
+    assert "cannot be empty" in str(excinfo.value)
+
+    with pytest.raises(ValueError):
+        repo.cancel("a1", "   ")
+
+
+def test_cancel_requires_non_placeholder_reason():
+    repo = AppointmentRepository()
+    repo.create(_appointment())
+    placeholders = ["placeholder", "none", "n/a", "na", "no reason", "blank", "test", "tbd", "temp", "null", "undefined"]
+    for placeholder in placeholders:
+        with pytest.raises(ValueError) as excinfo:
+            repo.cancel("a1", placeholder)
+        assert "cannot be a placeholder" in str(excinfo.value)
+
+        # check case-insensitive placeholder
+        with pytest.raises(ValueError):
+            repo.cancel("a1", placeholder.upper())
+
+
+def test_cancel_requires_non_punctuation_reason():
+    repo = AppointmentRepository()
+    repo.create(_appointment())
+    punctuations = ["-", "...", "???", "!!!", " - - "]
+    for punc in punctuations:
+        with pytest.raises(ValueError) as excinfo:
+            repo.cancel("a1", punc)
+        assert "cannot be a placeholder" in str(excinfo.value)
+
+
 def test_list_for_patient():
     repo = AppointmentRepository()
     repo.create(_appointment())
