@@ -5,11 +5,28 @@ exercising a multi-repo AI pipeline (Driftbridge), not a production service.
 
 from __future__ import annotations
 
-from models import Appointment
+from models import Appointment, Provider
 
 
 class DoubleBookingError(Exception):
     pass
+
+
+class ProviderRepository:
+    def __init__(self) -> None:
+        self._providers: dict[str, Provider] = {}
+
+    def create(self, provider: Provider) -> Provider:
+        self._providers[provider.provider_id] = provider
+        return provider
+
+    def get(self, provider_id: str) -> Provider | None:
+        return self._providers.get(provider_id)
+
+    def list(self, specialty: str | None = None) -> list[Provider]:
+        if specialty is None:
+            return list(self._providers.values())
+        return [p for p in self._providers.values() if specialty in p.specialties]
 
 
 class AppointmentRepository:
