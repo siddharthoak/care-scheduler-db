@@ -9,7 +9,7 @@ one.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 
@@ -17,7 +17,7 @@ from datetime import datetime
 class Provider:
     provider_id: str
     name: str
-    specialty: str
+    specialties: list[str] = field(default_factory=list)
 
 
 @dataclass
