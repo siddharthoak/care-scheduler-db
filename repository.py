@@ -1,11 +1,11 @@
-"""In-memory repository for appointments -- the data-access layer the rest
+"""In-memory repository for appointments and providers -- the data-access layer the rest
 of the platform builds on. No real database: this is a demo project for
 exercising a multi-repo AI pipeline (Driftbridge), not a production service.
 """
 
 from __future__ import annotations
 
-from models import Appointment
+from models import Appointment, Provider
 
 
 class DoubleBookingError(Exception):
@@ -40,3 +40,25 @@ class AppointmentRepository:
 
     def list_for_patient(self, patient_id: str) -> list[Appointment]:
         return [a for a in self._appointments.values() if a.patient_id == patient_id]
+
+
+class ProviderRepository:
+    def __init__(self) -> None:
+        self._providers: dict[str, Provider] = {}
+
+    def create(self, provider: Provider) -> Provider:
+        if not provider.specialties:
+            raise ValueError("Each provider must have one or more specialties recorded against them.")
+        self._providers[provider.provider_id] = provider
+        return provider
+
+    def get(self, provider_id: str) -> Provider | None:
+        return self._providers.get(provider_id)
+
+    def list(self, specialty: str | None = None) -> list[Provider]:
+        if not specialty:
+            return list(self._providers.values())
+        return [
+            p for p in self._providers.values()
+            if p.specialties and any(s.strip().lower() == specialty.strip().lower() for s in p.specialties)
+        ]

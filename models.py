@@ -9,7 +9,7 @@ one.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 
@@ -17,7 +17,14 @@ from datetime import datetime
 class Provider:
     provider_id: str
     name: str
-    specialty: str
+    specialty: str = ""
+    specialties: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if self.specialty and not self.specialties:
+            self.specialties = [self.specialty]
+        elif self.specialties and not self.specialty:
+            self.specialty = self.specialties[0]
 
 
 @dataclass
