@@ -28,3 +28,4 @@ class Appointment:
     start_time: datetime
     status: str = "scheduled"  # "scheduled" | "completed" | "cancelled"
     reason_for_visit: str = ""
+    cancellation_reason: str = ""

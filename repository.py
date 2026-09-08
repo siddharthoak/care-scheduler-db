@@ -12,6 +12,10 @@ class DoubleBookingError(Exception):
     pass
 
 
+class InvalidCancellationReasonError(ValueError):
+    pass
+
+
 class AppointmentRepository:
     def __init__(self) -> None:
         self._appointments: dict[str, Appointment] = {}
@@ -30,9 +34,32 @@ class AppointmentRepository:
         self._appointments[appointment.appointment_id] = appointment
         return appointment
 
-    def cancel(self, appointment_id: str) -> Appointment:
+    def cancel(self, appointment_id: str, reason: str) -> Appointment:
+        if not isinstance(reason, str):
+            raise InvalidCancellationReasonError("Cancellation reason must be a string.")
+
+        stripped_reason = reason.strip()
+        if not stripped_reason:
+            raise InvalidCancellationReasonError("Cancellation reason must be a short, non-empty explanation.")
+
+        placeholders = {
+            "placeholder",
+            "none",
+            "n/a",
+            "na",
+            "no reason",
+            "test",
+            "null",
+            "blank",
+            "-",
+            ".",
+        }
+        if stripped_reason.lower() in placeholders:
+            raise InvalidCancellationReasonError("Cancellation reason cannot be a placeholder.")
+
         appointment = self._appointments[appointment_id]
         appointment.status = "cancelled"
+        appointment.cancellation_reason = stripped_reason
         return appointment
 
     def get(self, appointment_id: str) -> Appointment | None:
